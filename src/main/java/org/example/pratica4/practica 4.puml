@@ -1,0 +1,131 @@
+
+@startuml
+
+title Diagrama de Clases - Eight Off
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+top to bottom direction
+
+package "DeckOfCards" {
+
+    abstract class Carta {
+        +compareTo(carta: Carta): int
+    }
+
+    class CartaInglesa {
+        +getValor(): int
+        +getValorBajo(): int
+        +getPalo(): Palo
+        +getColor(): String
+        +makeFaceUp(): void
+        +tieneElMismoPalo(palo: Palo): boolean
+    }
+
+    enum Palo {
+    }
+
+    class Mazo {
+        -cartas: ListaSimple<CartaInglesa>
+        -cantidad: int
+        +Mazo()
+        -llenar(): void
+        -mezclar(): void
+        +obtenerUnaCarta(): CartaInglesa
+        +ordenar(): void
+        +getCartas(): ListaSimple<CartaInglesa>
+    }
+}
+
+package "Logica" {
+
+    class Nodo<T> {
+        -dato: T
+        -next: Nodo<T>
+        +Nodo(dato: T)
+        +getDato(): T
+        +setDato(dato: T): void
+        +getNext(): Nodo<T>
+        +setNext(next: Nodo<T>): void
+    }
+
+    class ListaSimple<T> {
+        -inicio: Nodo<T>
+        +insertarInicio(dato: T): void
+        +insetarFin(dato: T): void
+        +eliminarInicio(): T
+        +eliminarFin(): T
+    }
+
+    class TableauDeck {
+        -cartas: ListaSimple<CartaInglesa>
+        -ultima: CartaInglesa
+        +inicializar(carta: CartaInglesa): void
+        +sePuedeAgregarCarta(carta: CartaInglesa): boolean
+        +agregarCarta(carta: CartaInglesa): boolean
+        +verUltimaCarta(): CartaInglesa
+        +removerUltimaCarta(): CartaInglesa
+        +isEmpty(): boolean
+        +getUltimaCarta(): CartaInglesa
+        +getCards(): ListaSimple<CartaInglesa>
+    }
+
+    class FoundationDeck {
+        -palo: Palo
+        -cartas: ListaSimple<CartaInglesa>
+        -ultima: CartaInglesa
+        -cantidad: int
+        +FoundationDeck(palo: Palo)
+        +FoundationDeck(carta: CartaInglesa)
+        +agregarCarta(carta: CartaInglesa): boolean
+        +removerUltimaCarta(): CartaInglesa
+        +estaVacio(): boolean
+        +getUltimaCarta(): CartaInglesa
+        +toString(): String
+    }
+
+    class EightOffGame {
+        -columnas: TableauDeck[]
+        -finales: FoundationDeck[]
+        -libres: CartaInglesa[]
+        -mazo: Mazo
+        +EightOffGame()
+        +iniciar(): void
+        +moverColumna(origen: int, destino: int): boolean
+        +moverALibre(origen: int, destino: int): boolean
+        +moverLibreAColumna(origen: int, destino: int): boolean
+        +moverAFinal(origen: int): boolean
+        +moverLibreAFinal(origen: int): boolean
+        +gano(): boolean
+    }
+
+    class Movimiento {
+        -origen: int
+        -destino: int
+        -carta: CartaInglesa
+    }
+}
+
+Carta <|-- CartaInglesa
+
+CartaInglesa --> Palo
+
+ListaSimple *-- Nodo
+
+Mazo --> ListaSimple
+
+TableauDeck --> ListaSimple
+
+FoundationDeck --> ListaSimple
+
+EightOffGame *-- Mazo
+
+EightOffGame *-- TableauDeck
+
+EightOffGame *-- FoundationDeck
+
+EightOffGame --> CartaInglesa
+
+EightOffGame --> Movimiento
+
+@enduml

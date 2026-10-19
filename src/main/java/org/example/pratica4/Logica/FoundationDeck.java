@@ -65,24 +65,16 @@ public class FoundationDeck {
 
     // Eliminar la ultima carta
     public CartaInglesa removerUltimaCarta() {
-
         if (cantidad == 0) {
             return null;
         }
 
         CartaInglesa carta = cartas.eliminarFin();
         cantidad--;
-
-        if (cantidad == 0) {
-            ultima = null;
-        } else {
-            ultima = cartas.eliminarFin();
-            cartas.insetarFin(ultima);
-        }
+        ultima = cartas.verUltimo();
 
         return carta;
     }
-
     // Revisar si el monton esta vacio
     public boolean estaVacio() {
         return cantidad == 0;
@@ -91,6 +83,16 @@ public class FoundationDeck {
     // Obtener la ultima carta sin eliminarla
     public CartaInglesa getUltimaCarta() {
         return ultima;
+    }
+
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public void limpiar() {
+        cartas = new ListaSimple<>();
+        ultima = null;
+        cantidad = 0;
     }
 
     // Mostrar las cartas

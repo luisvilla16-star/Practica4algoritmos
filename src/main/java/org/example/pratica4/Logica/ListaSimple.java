@@ -5,7 +5,6 @@ public class ListaSimple<T> {
 
     public void insertarInicio(T dato) {
         Nodo<T> n = new Nodo<>(dato);
-        n.setDato(dato);
         n.setNext(inicio);
         inicio = n;
     }
@@ -58,6 +57,20 @@ public class ListaSimple<T> {
 
             return dato;
         }
+    }
+
+    public T verUltimo() {
+        if (inicio == null) {
+            return null;
+        }
+
+        Nodo<T> r = inicio;
+
+        while (r.getNext() != null) {
+            r = r.getNext();
+        }
+
+        return r.getDato();
     }
 
 

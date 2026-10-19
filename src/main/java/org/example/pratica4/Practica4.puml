@@ -5,41 +5,56 @@ title Diagrama de Clases - Eight Off
 
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
+skinparam shadowing false
+
 top to bottom direction
 
 package "DeckOfCards" {
 
+    interface "Comparable<Carta>" as Comparable
+
     abstract class Carta {
-        +compareTo(carta: Carta): int
+        -valor: int
+        #palo: Palo
+        -color: String
+        -valorBajo: int
+        -faceup: boolean
+
+        +Carta(valor: int, palo: Palo, color: String)
+        +makeFaceDown(): void
+        +makeFaceUp(): void
+        +isFaceup(): boolean
+        +toString(): String
+        +tieneElMismoValor(carta: Carta): boolean
+        +tieneElMismoPalo(palo: Palo): boolean
+        +esLaSiguiente(carta: Carta): boolean
+        +getValor(): int
+        +getPalo(): Palo
+        +getColor(): String
+        +getValorBajo(): int
+        {abstract} +compareTo(carta: Carta): int
     }
 
     class CartaInglesa {
-        +getValor(): int
-        +getValorBajo(): int
-        +getPalo(): Palo
-        +getColor(): String
-        +makeFaceUp(): void
-        +tieneElMismoPalo(palo: Palo): boolean
     }
 
     enum Palo {
     }
 
     class Mazo {
-        -cartas: ListaSimple<CartaInglesa>
+        -cartas: ListaCircularDoble<CartaInglesa>
         -cantidad: int
         +Mazo()
         -llenar(): void
         -mezclar(): void
         +obtenerUnaCarta(): CartaInglesa
         +ordenar(): void
-        +getCartas(): ListaSimple<CartaInglesa>
     }
 }
 
 package "Logica" {
 
-    class Nodo<T> {
+    class "Nodo<T>" as Nodo {
         -dato: T
         -next: Nodo<T>
         +Nodo(dato: T)
@@ -49,7 +64,7 @@ package "Logica" {
         +setNext(next: Nodo<T>): void
     }
 
-    class ListaSimple<T> {
+    class "ListaSimple<T>" as ListaSimple {
         -inicio: Nodo<T>
         +insertarInicio(dato: T): void
         +insetarFin(dato: T): void
@@ -57,9 +72,45 @@ package "Logica" {
         +eliminarFin(): T
     }
 
+    class "NodoDoble<T>" as NodoDoble {
+        -info: T
+        -sig: NodoDoble<T>
+        -ant: NodoDoble<T>
+        +NodoDoble(info: T)
+        +getInfo(): T
+        +setInfo(info: T): void
+        +getSig(): NodoDoble<T>
+        +setSig(sig: NodoDoble<T>): void
+        +getAnt(): NodoDoble<T>
+        +setAnt(ant: NodoDoble<T>): void
+    }
+
+    class "ListaCircularDoble<T>" as ListaCircularDoble {
+        -inicio: NodoDoble<T>
+        -fin: NodoDoble<T>
+        +insertarInicio(dato: T): void
+        +insertarFin(dato: T): void
+        +eliminarInicio(): T
+        +eliminarFin(): T
+        +estaVacia(): boolean
+    }
+
+    class "Pila<T>" as Pila {
+        -pila: T[]
+        -tope: int
+
+        +Pila()
+        +Pila(capacidad: int)
+        +Push(dato: T): boolean
+        +Pop(): T
+        +llena(): boolean
+        +vacia(): boolean
+    }
+
     class TableauDeck {
         -cartas: ListaSimple<CartaInglesa>
         -ultima: CartaInglesa
+
         +inicializar(carta: CartaInglesa): void
         +sePuedeAgregarCarta(carta: CartaInglesa): boolean
         +agregarCarta(carta: CartaInglesa): boolean
@@ -67,7 +118,6 @@ package "Logica" {
         +removerUltimaCarta(): CartaInglesa
         +isEmpty(): boolean
         +getUltimaCarta(): CartaInglesa
-        +getCards(): ListaSimple<CartaInglesa>
     }
 
     class FoundationDeck {
@@ -75,6 +125,7 @@ package "Logica" {
         -cartas: ListaSimple<CartaInglesa>
         -ultima: CartaInglesa
         -cantidad: int
+
         +FoundationDeck(palo: Palo)
         +FoundationDeck(carta: CartaInglesa)
         +agregarCarta(carta: CartaInglesa): boolean
@@ -89,6 +140,8 @@ package "Logica" {
         -finales: FoundationDeck[]
         -libres: CartaInglesa[]
         -mazo: Mazo
+        -historial: Pila<Movimiento>
+
         +EightOffGame()
         +iniciar(): void
         +moverColumna(origen: int, destino: int): boolean
@@ -97,35 +150,52 @@ package "Logica" {
         +moverAFinal(origen: int): boolean
         +moverLibreAFinal(origen: int): boolean
         +gano(): boolean
+        +deshacer(): boolean
+        +obtenerPista(): String
+        +hayMovimientos(): boolean
     }
 
     class Movimiento {
         -origen: int
         -destino: int
         -carta: CartaInglesa
+        -tipoOrigen: String
+        -tipoDestino: String
+
+        +Movimiento()
+        +getOrigen(): int
+        +getDestino(): int
+        +getCarta(): CartaInglesa
     }
 }
 
+' Herencia e interfaz
+Comparable <|.. Carta
 Carta <|-- CartaInglesa
 
-CartaInglesa --> Palo
+' Relaciones de las cartas
+Carta --> Palo
 
+' Listas
 ListaSimple *-- Nodo
+ListaCircularDoble *-- NodoDoble
 
-Mazo --> ListaSimple
+' Mazo
+Mazo *-- ListaCircularDoble
 
-TableauDeck --> ListaSimple
+' Columnas y montones finales
+TableauDeck *-- ListaSimple
+FoundationDeck *-- ListaSimple
+FoundationDeck --> Palo
 
-FoundationDeck --> ListaSimple
-
+' Control del juego}
 EightOffGame *-- Mazo
-
 EightOffGame *-- TableauDeck
-
 EightOffGame *-- FoundationDeck
+EightOffGame *-- Pila
 
-EightOffGame --> CartaInglesa
-
-EightOffGame --> Movimiento
+' Historial de movimientos
+Pila ..> Movimiento : guarda
+Movimiento --> CartaInglesa
 
 @enduml

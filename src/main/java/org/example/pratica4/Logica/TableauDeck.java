@@ -29,7 +29,7 @@ public class TableauDeck {
 
         // Deben ser del mismo palo y en orden descendente
         if (ultima.getPalo() == carta.getPalo()) {
-            if (ultima.getValor() == carta.getValor() + 1) {
+            if (ultima.getValorBajo() == carta.getValorBajo() + 1) {
                 return true;
             }
         }
@@ -65,11 +65,7 @@ public class TableauDeck {
         CartaInglesa carta = cartas.eliminarFin();
 
         // Actualizar la ultima carta
-        ultima = cartas.eliminarFin();
-
-        if (ultima != null) {
-            cartas.insetarFin(ultima);
-        }
+        ultima = cartas.verUltimo();
 
         return carta;
     }
@@ -87,5 +83,10 @@ public class TableauDeck {
     // Obtener la lista de cartas
     public ListaSimple<CartaInglesa> getCards() {
         return cartas;
+    }
+
+    public void limpiar() {
+        cartas = new ListaSimple<>();
+        ultima = null;
     }
 }

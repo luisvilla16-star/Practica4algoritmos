@@ -1,13 +1,13 @@
 
 package org.example.pratica4.DeckOfCards;
 
-import org.example.pratica4.Logica.ListaSimple;
+import org.example.pratica4.Logica.ListaCircularDoble;
 import java.util.Random;
 
 public class Mazo {
 
-    private ListaSimple<CartaInglesa> cartas =
-            new ListaSimple<>();
+    private ListaCircularDoble<CartaInglesa> cartas =
+            new ListaCircularDoble<>();
 
     private int cantidad = 0;
 
@@ -16,7 +16,7 @@ public class Mazo {
         mezclar();
     }
 
-    public ListaSimple<CartaInglesa> getCartas() {
+    public ListaCircularDoble<CartaInglesa> getCartas() {
         return cartas;
     }
 
@@ -51,7 +51,7 @@ public class Mazo {
         }
 
         for (int i = 0; i < cantidad; i++) {
-            cartas.insetarFin(arreglo[i]);
+            cartas.insertarFin(arreglo[i]);
         }
     }
 
@@ -65,7 +65,7 @@ public class Mazo {
                         new CartaInglesa(
                                 i, palo, palo.getColor());
 
-                cartas.insetarFin(c);
+                cartas.insertarFin(c);
                 cantidad++;
             }
         }
@@ -94,7 +94,7 @@ public class Mazo {
         }
 
         for (int i = 0; i < cantidad; i++) {
-            cartas.insetarFin(arreglo[i]);
+            cartas.insertarFin(arreglo[i]);
         }
     }
 
@@ -113,7 +113,7 @@ public class Mazo {
         }
 
         for (int i = 0; i < cantidad; i++) {
-            cartas.insetarFin(arreglo[i]);
+            cartas.insertarFin(arreglo[i]);
         }
 
         return resultado;

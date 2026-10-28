@@ -1,5 +1,6 @@
-
 package org.example.pratica4.Logica;
+
+import java.util.ArrayList;
 
 import org.example.pratica4.DeckOfCards.CartaInglesa;
 import org.example.pratica4.DeckOfCards.Mazo;
@@ -18,7 +19,7 @@ public class EightOffGame {
         columnas = new TableauDeck[8];
         fundaciones = new FoundationDeck[4];
         reservas = new CartaInglesa[8];
-        historial = new Pila<>(100);
+        historial = new Pila<>(500);
 
         for (int i = 0; i < 8; i++) {
             columnas[i] = new TableauDeck();
@@ -29,26 +30,26 @@ public class EightOffGame {
         }
     }
 
-    // Iniciar una partida nueva
     public void iniciarJuego() {
 
+        historial = new Pila<>(100);
         mazo = new Mazo();
 
         for (int i = 0; i < 8; i++) {
             columnas[i].limpiar();
+            reservas[i] = null;
         }
 
         for (int i = 0; i < 4; i++) {
             fundaciones[i].limpiar();
         }
 
-        for (int i = 0; i < 8; i++) {
-            reservas[i] = null;
-        }
+        repartirColumnas();
+        repartirReservas();
+    }
 
-        historial = new Pila<>(100);
+    private void repartirColumnas() {
 
-        // Repartir seis cartas a cada columna
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 6; j++) {
 
@@ -59,8 +60,10 @@ public class EightOffGame {
                 }
             }
         }
+    }
 
-        // Repartir cuatro cartas a las reservas
+    private void repartirReservas() {
+
         for (int i = 0; i < 4; i++) {
 
             CartaInglesa carta = mazo.obtenerUnaCarta();
@@ -72,7 +75,6 @@ public class EightOffGame {
         }
     }
 
-    // Buscar una reserva vacía
     public int buscarReservaVacia() {
 
         for (int i = 0; i < 8; i++) {
@@ -84,7 +86,6 @@ public class EightOffGame {
         return -1;
     }
 
-    // Obtener una columna
     public TableauDeck obtenerColumna(int posicion) {
 
         if (posicion < 0 || posicion >= 8) {
@@ -94,60 +95,73 @@ public class EightOffGame {
         return columnas[posicion];
     }
 
-    // Mover una carta de una columna a otra
     public boolean moverEntreColumnas(int origen, int destino) {
 
-        if (historial.llena()) {
+        if (origen < 0 || origen >= 8 || destino < 0 || destino >= 8) {
             return false;
         }
 
-        if (origen < 0 || origen >= 8
-                || destino < 0 || destino >= 8
-                || origen == destino) {
+        return moverSecuenciaEntreColumnas(
+                origen, destino, columnas[origen].getCantidad() - 1
+        );
+    }
+
+    public boolean moverSecuenciaEntreColumnas(int origen, int destino, int inicio) {
+
+        if (origen < 0 || origen >= 8 || destino < 0 || destino >= 8
+                || origen == destino || historial.llena()) {
             return false;
         }
 
-        CartaInglesa carta = columnas[origen].verUltimaCarta();
+        TableauDeck columnaOrigen = columnas[origen];
+        TableauDeck columnaDestino = columnas[destino];
 
-        if (carta == null
-                || !columnas[destino].sePuedeAgregarCarta(carta)) {
+        if (inicio < 0 || inicio >= columnaOrigen.getCantidad()) {
             return false;
         }
 
-        CartaInglesa movida = columnas[origen].removerUltimaCarta();
-
-        if (movida == null) {
+        if (!columnaOrigen.secuenciaValida(inicio)) {
             return false;
         }
 
-        if (!columnas[destino].agregarCarta(movida)) {
-            columnas[origen].restaurarCarta(movida);
+        CartaInglesa primera = columnaOrigen.obtenerCarta(inicio);
+
+        if (!columnaDestino.sePuedeAgregarCarta(primera)) {
             return false;
         }
 
-        historial.Push(new Movimientos(
-                origen, destino, movida, "columna", "columna"
-        ));
+        ArrayList<CartaInglesa> secuencia =
+                columnaOrigen.obtenerSecuencia(inicio);
+
+        Movimientos movimiento = new Movimientos(
+                origen, destino, secuencia, "columna", "columna"
+        );
+
+        columnaOrigen.removerSecuencia(inicio);
+
+        for (int i = 0; i < secuencia.size(); i++) {
+            columnaDestino.restaurarCarta(secuencia.get(i));
+        }
+
+        historial.Push(movimiento);
 
         return true;
     }
 
-    // Mover una carta de una reserva a una columna
     public boolean moverDeReserva(int reserva, int columna) {
 
-        if (historial.llena()) {
-            return false;
-        }
-
-        if (reserva < 0 || reserva >= 8
-                || columna < 0 || columna >= 8) {
+        if (reserva < 0 || reserva >= 8 || columna < 0 || columna >= 8
+                || historial.llena()) {
             return false;
         }
 
         CartaInglesa carta = reservas[reserva];
 
-        if (carta == null
-                || !columnas[columna].sePuedeAgregarCarta(carta)) {
+        if (carta == null) {
+            return false;
+        }
+
+        if (!columnas[columna].sePuedeAgregarCarta(carta)) {
             return false;
         }
 
@@ -164,14 +178,13 @@ public class EightOffGame {
         return true;
     }
 
-    // Mover una carta de una columna a una reserva
+    public boolean moverDeReservaAColumna(int reserva, int columna) {
+        return moverDeReserva(reserva, columna);
+    }
+
     public boolean moverAReserva(int columna) {
 
-        if (historial.llena()) {
-            return false;
-        }
-
-        if (columna < 0 || columna >= 8) {
+        if (columna < 0 || columna >= 8 || historial.llena()) {
             return false;
         }
 
@@ -196,14 +209,9 @@ public class EightOffGame {
         return true;
     }
 
-    // Mover una carta de una columna a su fundación
     public boolean moverAFundacion(int columna) {
 
-        if (historial.llena()) {
-            return false;
-        }
-
-        if (columna < 0 || columna >= 8) {
+        if (columna < 0 || columna >= 8 || historial.llena()) {
             return false;
         }
 
@@ -228,14 +236,9 @@ public class EightOffGame {
         return true;
     }
 
-    // Mover una carta de una reserva a su fundación
     public boolean moverReservaAFundacion(int reserva) {
 
-        if (historial.llena()) {
-            return false;
-        }
-
-        if (reserva < 0 || reserva >= 8) {
+        if (reserva < 0 || reserva >= 8 || historial.llena()) {
             return false;
         }
 
@@ -260,8 +263,6 @@ public class EightOffGame {
         return true;
     }
 
-    // DESHACER EL ÚLTIMO MOVIMIENTO
-    // Regresa la carta sin comprobar las reglas del juego
     public boolean deshacerMovimiento() {
 
         if (historial.vacia()) {
@@ -270,63 +271,49 @@ public class EightOffGame {
 
         Movimientos movimiento = historial.Pop();
 
-        CartaInglesa carta = movimiento.getCarta();
-
         int origen = movimiento.getOrigen();
         int destino = movimiento.getDestino();
 
         String tipoOrigen = movimiento.getTipoOrigen();
         String tipoDestino = movimiento.getTipoDestino();
 
-        // Columna a columna
         if (tipoOrigen.equals("columna")
-                && tipoDestino.equals("columna")) {
+                && tipoDestino.equals("columna")
+                && movimiento.getCartasMovidas().size() > 1) {
 
-            columnas[destino].removerUltimaCarta();
-            columnas[origen].restaurarCarta(carta);
+            ArrayList<CartaInglesa> secuencia =
+                    movimiento.getCartasMovidas();
+
+            for (int i = 0; i < secuencia.size(); i++) {
+                columnas[destino].removerUltimaCarta();
+            }
+
+            for (int i = 0; i < secuencia.size(); i++) {
+                columnas[origen].restaurarCarta(secuencia.get(i));
+            }
+
+            return true;
         }
 
-        // Reserva a columna
-        else if (tipoOrigen.equals("reserva")
-                && tipoDestino.equals("columna")) {
+        CartaInglesa carta = movimiento.getCarta();
 
+        if (tipoDestino.equals("columna")) {
             columnas[destino].removerUltimaCarta();
-            reservas[origen] = carta;
-        }
-
-        // Columna a reserva
-        else if (tipoOrigen.equals("columna")
-                && tipoDestino.equals("reserva")) {
-
+        } else if (tipoDestino.equals("reserva")) {
             reservas[destino] = null;
-            columnas[origen].restaurarCarta(carta);
+        } else if (tipoDestino.equals("fundacion")) {
+            fundaciones[destino].removerUltimaCarta();
         }
 
-        // Columna a fundación
-        else if (tipoOrigen.equals("columna")
-                && tipoDestino.equals("fundacion")) {
-
-            fundaciones[destino].removerUltimaCarta();
+        if (tipoOrigen.equals("columna")) {
             columnas[origen].restaurarCarta(carta);
-        }
-
-        // Reserva a fundación
-        else if (tipoOrigen.equals("reserva")
-                && tipoDestino.equals("fundacion")) {
-
-            fundaciones[destino].removerUltimaCarta();
+        } else if (tipoOrigen.equals("reserva")) {
             reservas[origen] = carta;
-        }
-
-        else {
-            historial.Push(movimiento);
-            return false;
         }
 
         return true;
     }
 
-    // Obtener una carta de una reserva
     public CartaInglesa obtenerReserva(int posicion) {
 
         if (posicion < 0 || posicion >= 8) {
@@ -336,7 +323,6 @@ public class EightOffGame {
         return reservas[posicion];
     }
 
-    // Obtener una fundación
     public FoundationDeck obtenerFundacion(int posicion) {
 
         if (posicion < 0 || posicion >= 4) {
@@ -346,10 +332,19 @@ public class EightOffGame {
         return fundaciones[posicion];
     }
 
-    // Dar una pista
+    public boolean verificarVictoria() {
+
+        int total = 0;
+
+        for (int i = 0; i < 4; i++) {
+            total += fundaciones[i].getCantidad();
+        }
+
+        return total == 52;
+    }
+
     public String darPista() {
 
-        // Buscar cartas que puedan ir a las fundaciones
         for (int i = 0; i < 8; i++) {
 
             CartaInglesa carta = columnas[i].verUltimaCarta();
@@ -363,8 +358,7 @@ public class EightOffGame {
 
                 if ((ultima == null && carta.getValorBajo() == 1)
                         || (ultima != null
-                        && ultima.getValorBajo() + 1
-                        == carta.getValorBajo())) {
+                        && ultima.getValorBajo() + 1 == carta.getValorBajo())) {
 
                     return "Mueve " + carta + " de la columna "
                             + (i + 1) + " a su fundación.";
@@ -372,7 +366,6 @@ public class EightOffGame {
             }
         }
 
-        // Buscar cartas de las reservas que puedan ir a las fundaciones
         for (int i = 0; i < 8; i++) {
 
             CartaInglesa carta = reservas[i];
@@ -386,8 +379,7 @@ public class EightOffGame {
 
                 if ((ultima == null && carta.getValorBajo() == 1)
                         || (ultima != null
-                        && ultima.getValorBajo() + 1
-                        == carta.getValorBajo())) {
+                        && ultima.getValorBajo() + 1 == carta.getValorBajo())) {
 
                     return "Mueve " + carta + " de la reserva "
                             + (i + 1) + " a su fundación.";
@@ -395,7 +387,22 @@ public class EightOffGame {
             }
         }
 
-        // Buscar movimientos de una reserva a una columna
+        for (int i = 0; i < 8; i++) {
+
+            CartaInglesa carta = columnas[i].verUltimaCarta();
+
+            if (carta != null) {
+
+                for (int j = 0; j < 8; j++) {
+
+                    if (i != j && columnas[j].sePuedeAgregarCarta(carta)) {
+                        return "Mueve " + carta + " de la columna "
+                                + (i + 1) + " a la columna " + (j + 1) + ".";
+                    }
+                }
+            }
+        }
+
         for (int i = 0; i < 8; i++) {
 
             CartaInglesa carta = reservas[i];
@@ -412,52 +419,6 @@ public class EightOffGame {
             }
         }
 
-        // Buscar movimientos entre columnas
-        for (int i = 0; i < 8; i++) {
-
-            CartaInglesa carta = columnas[i].verUltimaCarta();
-
-            if (carta != null) {
-
-                for (int j = 0; j < 8; j++) {
-
-                    if (i != j
-                            && columnas[j].sePuedeAgregarCarta(carta)) {
-
-                        return "Mueve " + carta + " de la columna "
-                                + (i + 1) + " a la columna " + (j + 1) + ".";
-                    }
-                }
-            }
-        }
-
-        // Buscar una carta que se pueda guardar en una reserva
-        if (buscarReservaVacia() != -1) {
-
-            for (int i = 0; i < 8; i++) {
-
-                CartaInglesa carta = columnas[i].verUltimaCarta();
-
-                if (carta != null) {
-                    return "Puedes guardar " + carta + " de la columna "
-                            + (i + 1) + " en una reserva vacía.";
-                }
-            }
-        }
-
-        return "No encontré movimientos disponibles. "
-                + "Intenta deshacer un movimiento o iniciar otra partida.";
-    }
-
-    // Comprobar si se ganó el juego
-    public boolean verificarVictoria() {
-
-        int total = 0;
-
-        for (int i = 0; i < 4; i++) {
-            total = total + fundaciones[i].getCantidad();
-        }
-
-        return total == 52;
+        return "No hay movimientos disponibles.";
     }
 }

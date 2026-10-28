@@ -1,4 +1,3 @@
-
 package org.example.pratica4;
 
 import javafx.geometry.Insets;
@@ -36,6 +35,7 @@ public class HelloController {
 
     private int seleccion = -1;
     private String tipoSeleccion = "";
+    private int indiceCartaSeleccionada = -1;
 
     public Parent crearInterfaz() {
 
@@ -45,10 +45,7 @@ public class HelloController {
 
         Label titulo = new Label("EIGHT OFF");
         titulo.setFont(Font.font("Arial", 28));
-        titulo.setStyle(
-                "-fx-text-fill: white;" +
-                        "-fx-font-weight: bold;"
-        );
+        titulo.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
 
         Button nuevo = new Button("Nuevo juego");
         Button deshacer = new Button("Deshacer");
@@ -66,9 +63,7 @@ public class HelloController {
             }
         });
 
-        pista.setOnAction(e ->
-                mensaje.setText(juego.darPista())
-        );
+        pista.setOnAction(e -> mensaje.setText(juego.darPista()));
 
         HBox controles = new HBox(10, nuevo, deshacer, pista);
         controles.setAlignment(Pos.CENTER);
@@ -80,14 +75,10 @@ public class HelloController {
         filaReservas.setAlignment(Pos.CENTER);
 
         for (int i = 0; i < 8; i++) {
-
             final int posicion = i;
 
             reservas[i] = crearBotonCarta("Vacía");
-
-            reservas[i].setOnAction(e ->
-                    seleccionarReserva(posicion)
-            );
+            reservas[i].setOnAction(e -> seleccionarReserva(posicion));
 
             filaReservas.getChildren().add(reservas[i]);
         }
@@ -96,37 +87,25 @@ public class HelloController {
         filaFundaciones.setAlignment(Pos.CENTER);
 
         for (int i = 0; i < 4; i++) {
-
             final int posicion = i;
 
             fundaciones[i] = crearBotonCarta("Vacía");
-
-            fundaciones[i].setOnAction(e ->
-                    moverAFundacion(posicion)
-            );
+            fundaciones[i].setOnAction(e -> moverAFundacion(posicion));
 
             filaFundaciones.getChildren().add(fundaciones[i]);
         }
 
-        VBox zonaReservas = new VBox(
-                8, tituloReservas, filaReservas
-        );
+        VBox zonaReservas = new VBox(8, tituloReservas, filaReservas);
         zonaReservas.setAlignment(Pos.CENTER);
 
-        VBox zonaFundaciones = new VBox(
-                8, tituloFundaciones, filaFundaciones
-        );
+        VBox zonaFundaciones = new VBox(8, tituloFundaciones, filaFundaciones);
         zonaFundaciones.setAlignment(Pos.CENTER);
 
-        HBox zonasSuperiores = new HBox(
-                30, zonaReservas, zonaFundaciones
-        );
+        HBox zonasSuperiores = new HBox(30, zonaReservas, zonaFundaciones);
         zonasSuperiores.setAlignment(Pos.CENTER);
         zonasSuperiores.setPadding(new Insets(15));
 
-        VBox superior = new VBox(
-                12, titulo, controles, zonasSuperiores
-        );
+        VBox superior = new VBox(12, titulo, controles, zonasSuperiores);
         superior.setAlignment(Pos.CENTER);
 
         principal.setTop(superior);
@@ -138,55 +117,35 @@ public class HelloController {
         tablero.setPadding(new Insets(10));
 
         for (int i = 0; i < 8; i++) {
-
             final int posicion = i;
 
-            botonesColumna[i] = new Button(
-                    "Columna " + (i + 1)
-            );
-
+            botonesColumna[i] = new Button("Columna " + (i + 1));
             botonesColumna[i].setMinWidth(80);
             botonesColumna[i].setMaxWidth(Double.MAX_VALUE);
 
-            botonesColumna[i].setOnAction(e ->
-                    seleccionarColumna(posicion)
-            );
+            botonesColumna[i].setOnAction(e -> seleccionarColumna(posicion));
 
             cajasColumnas[i] = new VBox(5);
             cajasColumnas[i].setAlignment(Pos.TOP_CENTER);
             cajasColumnas[i].setMinWidth(80);
 
-            cajasColumnas[i].getChildren().add(
-                    botonesColumna[i]
-            );
+            cajasColumnas[i].getChildren().add(botonesColumna[i]);
 
             tablero.add(cajasColumnas[i], i, 0);
         }
 
-        // Tamaño mínimo para que aparezcan las barras
         tablero.setMinWidth(850);
         tablero.setMinHeight(600);
 
-        // Barras de desplazamiento
         ScrollPane desplazamiento = new ScrollPane();
-
         desplazamiento.setContent(tablero);
         desplazamiento.setFitToWidth(false);
         desplazamiento.setFitToHeight(false);
-
-        desplazamiento.setHbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED
-        );
-
-        desplazamiento.setVbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED
-        );
-
+        desplazamiento.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        desplazamiento.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         desplazamiento.setPannable(true);
-
         desplazamiento.setStyle(
-                "-fx-background: #176b45;" +
-                        "-fx-background-color: #176b45;"
+                "-fx-background: #176b45; -fx-background-color: #176b45;"
         );
 
         principal.setCenter(desplazamiento);
@@ -208,10 +167,7 @@ public class HelloController {
 
         Label titulo = new Label(texto);
         titulo.setFont(Font.font("Arial", 14));
-        titulo.setStyle(
-                "-fx-text-fill: white;" +
-                        "-fx-font-weight: bold;"
-        );
+        titulo.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
 
         return titulo;
     }
@@ -241,13 +197,12 @@ public class HelloController {
 
     private Button crearCarta(CartaInglesa carta) {
 
-        Button boton = crearBotonCarta(carta.toString());
-
         String texto = carta.toString();
+        Button boton = crearBotonCarta(texto);
+
         String color = "#222222";
 
-        if (texto.contains("♥")
-                || texto.contains("❤")
+        if (texto.contains("♥") || texto.contains("❤")
                 || texto.contains("♦")) {
             color = "#d71920";
         }
@@ -267,9 +222,7 @@ public class HelloController {
         return boton;
     }
 
-    // Cargar la imagen de una carta desde resources/cartas
-    private void mostrarImagenCarta(
-            Button boton, CartaInglesa carta) {
+    private void mostrarImagenCarta(Button boton, CartaInglesa carta) {
 
         if (carta == null) {
             boton.setGraphic(null);
@@ -285,8 +238,7 @@ public class HelloController {
             palo = "DIAMANTE";
         } else if (palo.contains("TREB")) {
             palo = "TREBOL";
-        } else if (palo.contains("PICA")
-                || palo.contains("ESPADA")) {
+        } else if (palo.contains("PICA") || palo.contains("ESPADA")) {
             palo = "PICAS";
         }
 
@@ -334,11 +286,12 @@ public class HelloController {
                 return;
             }
 
-            if (juego.moverEntreColumnas(seleccion, posicion)) {
-                terminarMovimiento("Carta movida.");
+            if (juego.moverSecuenciaEntreColumnas(
+                    seleccion, posicion, indiceCartaSeleccionada)) {
+                terminarMovimiento("Secuencia movida correctamente.");
             } else {
                 mensaje.setText(
-                        "Movimiento inválido. Revisa las reglas."
+                        "Movimiento inválido. Revisa el orden de las cartas."
                 );
             }
 
@@ -348,13 +301,9 @@ public class HelloController {
         if (tipoSeleccion.equals("reserva")) {
 
             if (juego.moverDeReserva(seleccion, posicion)) {
-                terminarMovimiento(
-                        "Carta movida desde la reserva."
-                );
+                terminarMovimiento("Carta movida desde la reserva.");
             } else {
-                mensaje.setText(
-                        "No puedes colocar esa carta aquí."
-                );
+                mensaje.setText("No puedes colocar esa carta aquí.");
             }
 
             return;
@@ -366,18 +315,56 @@ public class HelloController {
             mensaje.setText("Columna vacía seleccionada.");
             seleccion = posicion;
             tipoSeleccion = "columna";
+            indiceCartaSeleccionada = -1;
             actualizarTablero();
             return;
         }
 
         seleccion = posicion;
         tipoSeleccion = "columna";
+        indiceCartaSeleccionada = columna.getCantidad() - 1;
 
         actualizarTablero();
 
         mensaje.setText(
-                "Columna " + (posicion + 1) +
-                        " seleccionada. Elige dónde mover la carta."
+                "Columna " + (posicion + 1)
+                        + " seleccionada. Elige dónde mover la carta."
+        );
+    }
+
+    private void seleccionarCartaColumna(int posicion, int indiceCarta) {
+
+        if (tipoSeleccion.equals("columna") && seleccion != posicion) {
+
+            if (juego.moverSecuenciaEntreColumnas(
+                    seleccion, posicion, indiceCartaSeleccionada)) {
+                terminarMovimiento("Secuencia movida correctamente.");
+            } else {
+                mensaje.setText("Movimiento inválido. Revisa las reglas.");
+            }
+
+            return;
+        }
+
+        if (tipoSeleccion.equals("reserva")) {
+
+            if (juego.moverDeReserva(seleccion, posicion)) {
+                terminarMovimiento("Carta movida desde la reserva.");
+            } else {
+                mensaje.setText("No puedes colocar esa carta aquí.");
+            }
+
+            return;
+        }
+
+        seleccion = posicion;
+        tipoSeleccion = "columna";
+        indiceCartaSeleccionada = indiceCarta;
+
+        actualizarTablero();
+
+        mensaje.setText(
+                "Carta seleccionada. También se moverán las cartas de encima."
         );
     }
 
@@ -388,13 +375,9 @@ public class HelloController {
             if (juego.buscarReservaVacia() >= 0) {
 
                 if (juego.moverAReserva(seleccion)) {
-                    terminarMovimiento(
-                            "Carta guardada en una reserva."
-                    );
+                    terminarMovimiento("Carta guardada en una reserva.");
                 } else {
-                    mensaje.setText(
-                            "No se pudo guardar la carta."
-                    );
+                    mensaje.setText("No se pudo guardar la carta.");
                 }
 
             } else {
@@ -404,9 +387,7 @@ public class HelloController {
             return;
         }
 
-        if (tipoSeleccion.equals("reserva")
-                && seleccion == posicion) {
-
+        if (tipoSeleccion.equals("reserva") && seleccion == posicion) {
             limpiarSeleccion();
             actualizarTablero();
             mensaje.setText("Selección cancelada.");
@@ -422,6 +403,7 @@ public class HelloController {
 
         seleccion = posicion;
         tipoSeleccion = "reserva";
+        indiceCartaSeleccionada = -1;
 
         actualizarTablero();
 
@@ -435,7 +417,14 @@ public class HelloController {
         boolean movido = false;
 
         if (tipoSeleccion.equals("columna")) {
-            movido = juego.moverAFundacion(seleccion);
+
+            TableauDeck columna = juego.obtenerColumna(seleccion);
+
+            if (columna != null
+                    && indiceCartaSeleccionada == columna.getCantidad() - 1) {
+                movido = juego.moverAFundacion(seleccion);
+            }
+
         } else if (tipoSeleccion.equals("reserva")) {
             movido = juego.moverReservaAFundacion(seleccion);
         } else {
@@ -446,9 +435,7 @@ public class HelloController {
         if (movido) {
             terminarMovimiento("Carta movida a la fundación.");
         } else {
-            mensaje.setText(
-                    "Movimiento inválido para la fundación."
-            );
+            mensaje.setText("Movimiento inválido para la fundación.");
         }
     }
 
@@ -458,46 +445,38 @@ public class HelloController {
         actualizarTablero();
 
         if (juego.verificarVictoria()) {
-            mensaje.setText(
-                    "¡Ganaste! Completaste las 52 cartas."
-            );
+            mensaje.setText("¡Ganaste! Completaste las 52 cartas.");
         } else {
             mensaje.setText(texto);
         }
     }
 
     private void limpiarSeleccion() {
+
         seleccion = -1;
         tipoSeleccion = "";
+        indiceCartaSeleccionada = -1;
     }
 
     private void actualizarTablero() {
 
-        // Mostrar las cartas de las columnas
         for (int i = 0; i < 8; i++) {
 
             final int posicion = i;
             TableauDeck columna = juego.obtenerColumna(i);
 
             cajasColumnas[i].getChildren().clear();
+            botonesColumna[i].setText("Columna " + (i + 1));
 
-            botonesColumna[i].setText(
-                    "Columna " + (i + 1)
-            );
-
-            if (tipoSeleccion.equals("columna")
-                    && seleccion == i) {
+            if (tipoSeleccion.equals("columna") && seleccion == i) {
                 botonesColumna[i].setStyle(
-                        "-fx-background-color: #ffe082;" +
-                                "-fx-font-weight: bold;"
+                        "-fx-background-color: #ffe082; -fx-font-weight: bold;"
                 );
             } else {
                 botonesColumna[i].setStyle("");
             }
 
-            cajasColumnas[i].getChildren().add(
-                    botonesColumna[i]
-            );
+            cajasColumnas[i].getChildren().add(botonesColumna[i]);
 
             if (columna == null) {
                 continue;
@@ -513,27 +492,26 @@ public class HelloController {
                 }
 
                 Button botonCarta = crearCarta(carta);
-
-                // Mostrar la imagen de la carta
                 mostrarImagenCarta(botonCarta, carta);
 
-                botonCarta.setOnAction(e -> {
+                if (tipoSeleccion.equals("columna")
+                        && seleccion == posicion
+                        && indiceCartaSeleccionada == indiceCarta) {
+                    botonCarta.setStyle(
+                            "-fx-background-color: #ffe082;" +
+                                    "-fx-border-color: #ff9800;" +
+                                    "-fx-border-width: 3;"
+                    );
+                }
 
-                    if (indiceCarta != columna.getCantidad() - 1) {
-                        mensaje.setText(
-                                "Solo puedes mover la última carta."
-                        );
-                        return;
-                    }
-
-                    seleccionarColumna(posicion);
-                });
+                botonCarta.setOnAction(e ->
+                        seleccionarCartaColumna(posicion, indiceCarta)
+                );
 
                 cajasColumnas[i].getChildren().add(botonCarta);
             }
         }
 
-        // Mostrar las reservas
         for (int i = 0; i < 8; i++) {
 
             CartaInglesa carta = juego.obtenerReserva(i);
@@ -545,8 +523,7 @@ public class HelloController {
                 mostrarImagenCarta(reservas[i], carta);
             }
 
-            if (tipoSeleccion.equals("reserva")
-                    && seleccion == i) {
+            if (tipoSeleccion.equals("reserva") && seleccion == i) {
                 reservas[i].setStyle(
                         "-fx-background-color: #ffe082;" +
                                 "-fx-border-color: black;"
@@ -563,7 +540,6 @@ public class HelloController {
             }
         }
 
-        // Mostrar las fundaciones
         for (int i = 0; i < 4; i++) {
 
             FoundationDeck fundacion = juego.obtenerFundacion(i);
@@ -577,4 +553,3 @@ public class HelloController {
         }
     }
 }
-

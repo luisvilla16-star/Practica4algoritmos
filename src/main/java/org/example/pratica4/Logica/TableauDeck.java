@@ -1,102 +1,148 @@
 package org.example.pratica4.Logica;
 
+import java.util.ArrayList;
 import org.example.pratica4.DeckOfCards.CartaInglesa;
 
 public class TableauDeck {
 
-    private ListaSimple<CartaInglesa> cartas = new ListaSimple<>();
+    private ListaSimple<CartaInglesa> cartas;
     private CartaInglesa ultima;
 
-    // Colocar las cartas al iniciar el juego
+    public TableauDeck() {
+        cartas = new ListaSimple<>();
+        ultima = null;
+    }
+
     public void inicializar(CartaInglesa carta) {
-        carta.makeFaceUp();
         cartas.insetarFin(carta);
         ultima = carta;
     }
 
-    // Revisar si se puede agregar una carta
     public boolean sePuedeAgregarCarta(CartaInglesa carta) {
+
         if (carta == null) {
             return false;
         }
 
-        // Si la columna esta vacia, solo acepta un rey
-        if (ultima == null) {
+        if (cartas.getCantidad() == 0) {
             return carta.getValorBajo() == 13;
         }
 
-        // Deben ser del mismo palo y en orden descendente
-        return ultima.getPalo() == carta.getPalo()
-                && ultima.getValorBajo() == carta.getValorBajo() + 1;
+        CartaInglesa ultimaCarta = verUltimaCarta();
+
+        return ultimaCarta.getPalo() == carta.getPalo()
+                && ultimaCarta.getValorBajo()
+                == carta.getValorBajo() + 1;
     }
 
-    // Agregar una carta respetando las reglas del juego
     public boolean agregarCarta(CartaInglesa carta) {
+
         if (!sePuedeAgregarCarta(carta)) {
             return false;
         }
 
-        carta.makeFaceUp();
         cartas.insetarFin(carta);
         ultima = carta;
+
         return true;
     }
 
-    // Restaurar una carta al deshacer, sin revisar las reglas
     public void restaurarCarta(CartaInglesa carta) {
-        if (carta == null) {
-            return;
+        if (carta != null) {
+            cartas.insetarFin(carta);
+            ultima = carta;
         }
-
-        carta.makeFaceUp();
-        cartas.insetarFin(carta);
-        ultima = carta;
     }
 
-    // Ver la ultima carta sin eliminarla
     public CartaInglesa verUltimaCarta() {
-        return ultima;
+        return cartas.verUltimo();
     }
 
-    // Eliminar la ultima carta
     public CartaInglesa removerUltimaCarta() {
-        if (ultima == null) {
-            return null;
-        }
 
         CartaInglesa carta = cartas.eliminarFin();
+
         ultima = cartas.verUltimo();
+
         return carta;
     }
 
-    // Comprobar si la columna esta vacia
     public boolean isEmpty() {
-        return ultima == null;
+        return cartas.getCantidad() == 0;
     }
 
-    // Obtener la ultima carta
     public CartaInglesa getUltimaCarta() {
-        return ultima;
+        return verUltimaCarta();
     }
 
-    // Obtener la lista de cartas
     public ListaSimple<CartaInglesa> getCards() {
         return cartas;
     }
 
-    // Obtener la cantidad de cartas
     public int getCantidad() {
         return cartas.getCantidad();
     }
 
-    // Obtener una carta por su posicion
     public CartaInglesa obtenerCarta(int posicion) {
         return cartas.obtener(posicion);
     }
 
-    // Limpiar la columna
     public void limpiar() {
         cartas = new ListaSimple<>();
         ultima = null;
+    }
+
+    // Comprobar si las cartas seleccionadas están ordenadas
+    public boolean secuenciaValida(int inicio) {
+
+        if (inicio < 0 || inicio >= getCantidad()) {
+            return false;
+        }
+
+        for (int i = inicio; i < getCantidad() - 1; i++) {
+
+            CartaInglesa inferior = cartas.obtener(i);
+            CartaInglesa superior = cartas.obtener(i + 1);
+
+            if (inferior.getPalo() != superior.getPalo()
+                    || inferior.getValorBajo()
+                    != superior.getValorBajo() + 1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Obtener las cartas seleccionadas y las que están encima
+    public ArrayList<CartaInglesa> obtenerSecuencia(int inicio) {
+
+        ArrayList<CartaInglesa> secuencia = new ArrayList<>();
+
+        if (inicio < 0 || inicio >= getCantidad()) {
+            return secuencia;
+        }
+
+        for (int i = inicio; i < getCantidad(); i++) {
+            secuencia.add(cartas.obtener(i));
+        }
+
+        return secuencia;
+    }
+
+    // Retirar una secuencia completa
+    public ArrayList<CartaInglesa> removerSecuencia(int inicio) {
+
+        ArrayList<CartaInglesa> secuencia = obtenerSecuencia(inicio);
+
+        if (secuencia.isEmpty()) {
+            return secuencia;
+        }
+
+        while (getCantidad() > inicio) {
+            removerUltimaCarta();
+        }
+
+        return secuencia;
     }
 }

@@ -1,4 +1,3 @@
-
 package org.example.pratica4.Logica;
 
 import org.example.pratica4.DeckOfCards.CartaInglesa;
@@ -11,14 +10,13 @@ public class FoundationDeck {
     private CartaInglesa ultima;
     private int cantidad = 0;
 
-    // Crear un monton indicando el palo
+    // Crear una fundacion indicando el palo
     public FoundationDeck(Palo palo) {
         this.palo = palo;
     }
 
-    // Crear un monton con una carta
+    // Crear una fundacion con un As
     public FoundationDeck(CartaInglesa carta) {
-
         palo = carta.getPalo();
 
         if (carta.getValorBajo() == 1) {
@@ -28,39 +26,35 @@ public class FoundationDeck {
         }
     }
 
-    // Agregar una carta al monton
+    // Agregar una carta respetando las reglas del juego
     public boolean agregarCarta(CartaInglesa carta) {
-
-        boolean agregado = false;
-
-        if (carta != null && carta.tieneElMismoPalo(palo)) {
-
-            if (ultima == null) {
-
-                // Si esta vacio, solo acepta un As
-                if (carta.getValorBajo() == 1) {
-
-                    cartas.insetarFin(carta);
-                    ultima = carta;
-                    cantidad++;
-                    agregado = true;
-                }
-
-            } else {
-
-                // La siguiente carta debe ser mayor por uno
-                if (ultima.getValorBajo() + 1 ==
-                        carta.getValorBajo()) {
-
-                    cartas.insetarFin(carta);
-                    ultima = carta;
-                    cantidad++;
-                    agregado = true;
-                }
-            }
+        if (carta == null || !carta.tieneElMismoPalo(palo)) {
+            return false;
         }
 
-        return agregado;
+        if (ultima == null) {
+            if (carta.getValorBajo() != 1) {
+                return false;
+            }
+        } else if (ultima.getValorBajo() + 1 != carta.getValorBajo()) {
+            return false;
+        }
+
+        cartas.insetarFin(carta);
+        ultima = carta;
+        cantidad++;
+        return true;
+    }
+
+    // Restaurar una carta al deshacer, sin revisar las reglas
+    public void restaurarCarta(CartaInglesa carta) {
+        if (carta == null) {
+            return;
+        }
+
+        cartas.insetarFin(carta);
+        ultima = carta;
+        cantidad++;
     }
 
     // Eliminar la ultima carta
@@ -72,10 +66,10 @@ public class FoundationDeck {
         CartaInglesa carta = cartas.eliminarFin();
         cantidad--;
         ultima = cartas.verUltimo();
-
         return carta;
     }
-    // Revisar si el monton esta vacio
+
+    // Revisar si la fundacion esta vacia
     public boolean estaVacio() {
         return cantidad == 0;
     }
@@ -85,10 +79,12 @@ public class FoundationDeck {
         return ultima;
     }
 
+    // Obtener la cantidad de cartas
     public int getCantidad() {
         return cantidad;
     }
 
+    // Limpiar la fundacion
     public void limpiar() {
         cartas = new ListaSimple<>();
         ultima = null;
@@ -98,19 +94,14 @@ public class FoundationDeck {
     // Mostrar las cartas
     @Override
     public String toString() {
-
         if (cantidad == 0) {
             return "---";
         }
 
         String resultado = "";
-
         for (int i = 0; i < cantidad; i++) {
-
             CartaInglesa carta = cartas.eliminarInicio();
-
             resultado += carta + " ";
-
             cartas.insetarFin(carta);
         }
 

@@ -11,7 +11,6 @@ public class Movimientos {
 
     public Movimientos(int origen, int destino, CartaInglesa carta,
                        String tipoOrigen, String tipoDestino) {
-
         this.origen = origen;
         this.destino = destino;
         this.carta = carta;

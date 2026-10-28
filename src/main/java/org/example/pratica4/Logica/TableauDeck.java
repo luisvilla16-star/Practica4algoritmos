@@ -1,4 +1,3 @@
-
 package org.example.pratica4.Logica;
 
 import org.example.pratica4.DeckOfCards.CartaInglesa;
@@ -17,37 +16,41 @@ public class TableauDeck {
 
     // Revisar si se puede agregar una carta
     public boolean sePuedeAgregarCarta(CartaInglesa carta) {
-
         if (carta == null) {
             return false;
         }
 
-        // Si la columna esta vacia
+        // Si la columna esta vacia, solo acepta un rey
         if (ultima == null) {
-            return true;
+            return carta.getValorBajo() == 13;
         }
 
         // Deben ser del mismo palo y en orden descendente
-        if (ultima.getPalo() == carta.getPalo()) {
-            if (ultima.getValorBajo() == carta.getValorBajo() + 1) {
-                return true;
-            }
-        }
-
-        return false;
+        return ultima.getPalo() == carta.getPalo()
+                && ultima.getValorBajo() == carta.getValorBajo() + 1;
     }
 
-    // Agregar una carta a la columna
+    // Agregar una carta respetando las reglas del juego
     public boolean agregarCarta(CartaInglesa carta) {
-
-        if (sePuedeAgregarCarta(carta)) {
-            carta.makeFaceUp();
-            cartas.insetarFin(carta);
-            ultima = carta;
-            return true;
+        if (!sePuedeAgregarCarta(carta)) {
+            return false;
         }
 
-        return false;
+        carta.makeFaceUp();
+        cartas.insetarFin(carta);
+        ultima = carta;
+        return true;
+    }
+
+    // Restaurar una carta al deshacer, sin revisar las reglas
+    public void restaurarCarta(CartaInglesa carta) {
+        if (carta == null) {
+            return;
+        }
+
+        carta.makeFaceUp();
+        cartas.insetarFin(carta);
+        ultima = carta;
     }
 
     // Ver la ultima carta sin eliminarla
@@ -57,16 +60,12 @@ public class TableauDeck {
 
     // Eliminar la ultima carta
     public CartaInglesa removerUltimaCarta() {
-
         if (ultima == null) {
             return null;
         }
 
         CartaInglesa carta = cartas.eliminarFin();
-
-        // Actualizar la ultima carta
         ultima = cartas.verUltimo();
-
         return carta;
     }
 
@@ -85,6 +84,17 @@ public class TableauDeck {
         return cartas;
     }
 
+    // Obtener la cantidad de cartas
+    public int getCantidad() {
+        return cartas.getCantidad();
+    }
+
+    // Obtener una carta por su posicion
+    public CartaInglesa obtenerCarta(int posicion) {
+        return cartas.obtener(posicion);
+    }
+
+    // Limpiar la columna
     public void limpiar() {
         cartas = new ListaSimple<>();
         ultima = null;
